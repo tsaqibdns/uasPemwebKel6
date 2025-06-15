@@ -3,37 +3,55 @@
    $query_ck = query("SELECT * FROM tb_riwayat_ck ORDER BY id_ck DESC");
    $query_dc = query("SELECT * FROM tb_riwayat_dc ORDER BY id_dc DESC");
    $query_cs = query("SELECT * FROM tb_riwayat_cs ORDER BY id_cs DESC");
-   // var_dump($query_cs);
 ?>
 
-   <div class="riwayat" class="main-content">
-      <div class="container">
-			<div class="baris">
-            <div class="selamat-datang">
-					<div class="col-header">
-						<h2 class="judul-md">Daftar Riwayat Transaksi</h2>
-					</div>	
-				</div>
-         </div>
-
-         <div class="baris">
-            <div class="col">
-               <?php require_once('riwayat_ck/riwayat_ck.php') ?>
-            </div>
-         </div>
-
-         <div class="baris">
-            <div class="col">
-               <?php require_once('riwayat_dc/riwayat_dc.php') ?>
-            </div>
-         </div>
-
-         <div class="baris">
-            <div class="col">
-               <?php require_once('riwayat_cs/riwayat_cs.php') ?>
-            </div>
-         </div>
+<div class="riwayat main-content">
+  <div class="container">
+    <div class="baris">
+      <div class="selamat-datang">
+        <div class="col-header">
+          <h2 class="judul-md">Daftar Riwayat Transaksi</h2>
+        </div>
       </div>
-   </div>
+    </div>
+
+    <div class="baris">
+      <ul class="order-tabs enhanced-tabs">
+        <li><a href="#" class="tab-link active" data-tab="ck"><img src="<?=url('_assets/img/cuci_komplit.png')?>" alt="Cuci Komplit" class="tab-icon"> Cuci Komplit</a></li>
+        <li><a href="#" class="tab-link" data-tab="dc"><img src="<?=url('_assets/img/dry_clean.png')?>" alt="Dry Clean" class="tab-icon"> Cuci Kering/Dry Clean</a></li>
+        <li><a href="#" class="tab-link" data-tab="cs"><img src="<?=url('_assets/img/kemeja_2.png')?>" alt="Cuci Satuan" class="tab-icon"> Cuci Satuan</a></li>
+      </ul>
+    </div>
+
+    <div class="baris">
+      <div id="tab-ck" class="tab-content" style="display:block;">
+        <?php require_once('riwayat_ck/riwayat_ck.php') ?>
+      </div>
+      <div id="tab-dc" class="tab-content" style="display:none;">
+        <?php require_once('riwayat_dc/riwayat_dc.php') ?>
+      </div>
+      <div id="tab-cs" class="tab-content" style="display:none;">
+        <?php require_once('riwayat_cs/riwayat_cs.php') ?>
+      </div>
+    </div>
+  </div>
+
+  <script>
+				document.querySelectorAll('.tab-link').forEach(function(tab) {
+					tab.addEventListener('click', function(e) {
+						e.preventDefault();
+						document.querySelectorAll('.tab-link').forEach(function(t) {
+							t.classList.remove('active');
+						});
+						this.classList.add('active');
+						const tabId = this.getAttribute('data-tab');
+						document.querySelectorAll('.tab-content').forEach(function(content) {
+							content.style.display = 'none';
+						});
+						document.getElementById('tab-' + tabId).style.display = 'block';
+					});
+				});
+			</script>
+</div>
 
 <?php require_once('../_footer.php') ?>
