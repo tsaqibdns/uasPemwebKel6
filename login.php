@@ -13,7 +13,7 @@
 <body>
 
 	<?php if (isset($_SESSION['login']) && isset($_SESSION['master'])) : ?>
-		<script>window.location='http://localhost/rumah_laundry/'</script>
+		<script>window.location='http://localhost/rumah_laundry_6/'</script>
 	<?php endif ?> 
 
 	<?php 
@@ -29,7 +29,7 @@
 				if (password_verify($password, $hasil['password'])) {
 					$_SESSION['master'] = $username;
 					$_SESSION['login'] = true; ?>
-						<script>window.location="http://localhost/rumah_laundry/";</script>
+						<script>window.location="http://localhost/rumah_laundry_6/";</script>
 				<?php 
 				}else {?>
 

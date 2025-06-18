@@ -30,7 +30,10 @@
 		</nav>
 		<div id="nav-mini">
 			<a href="<?=url()?>" class="link-nav">Beranda</a>
+			<a href="<?=url('laporan_harian.php')?>" class="link-nav">Laporan Harian</a>
 			<a href="<?=url('riwayat_transaksi/riwayat.php')?>" class="link-nav">Riwayat Transaksi</a>
+			<a href="<?=url('top5.php')?>" class="link-nav">Top 5</a>
 			<a href="<?=url('paket/paket.php')?>" class="link-nav">Daftar Paket</a>
+			
 		</div>
 	</header>

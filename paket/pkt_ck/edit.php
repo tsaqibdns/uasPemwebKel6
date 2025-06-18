@@ -11,7 +11,7 @@
 				<div class="box">
                <img src="<?=url('_assets/img/berhasil.png')?>" height="68" alt="alert sukses">
 					<p>Paket Berhasil Di Ubah</p>
-					<button onclick="window.location='http://localhost/rumah_laundry/paket/pkt_ck/pkt_ck.php'" class="btn-alert">Ok</button>
+					<button onclick="window.location='http://localhost/rumah_laundry_6/paket/pkt_ck/pkt_ck.php'" class="btn-alert">Ok</button>
 				</div>
          </div>
          
@@ -21,7 +21,7 @@
             <div class="box">
                <img src="<?=url('_assets/img/gagal.png')?>" height="68" alt="alert gagal">
                <p>Paket Gagal Di Ubah</p>
-               <button onclick="window.location='http://localhost/rumah_laundry/paket/pkt_ck/pkt_ck.php'" class="btn-alert">Ok</button>
+               <button onclick="window.location='http://localhost/rumah_laundry_6/paket/pkt_ck/pkt_ck.php'" class="btn-alert">Ok</button>
             </div>
          </div>
       <?php endif ?>      

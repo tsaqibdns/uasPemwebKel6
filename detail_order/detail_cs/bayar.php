@@ -11,7 +11,7 @@
          <div class="box">
          <img src="<?=url('_assets/img/berhasil.png')?>" height="68" alt="alert sukses">
             <p>Pembayaran Berhasil!</p>
-            <button onclick="window.location='http://localhost/rumah_laundry/riwayat_transaksi/riwayat.php'" class="btn-alert btn-success">Ok</button>
+            <button onclick="window.location='http://localhost/rumah_laundry_6/riwayat_transaksi/riwayat.php'" class="btn-alert btn-success">Ok</button>
          </div>
       </div>
       <?php else :?>

@@ -6,7 +6,7 @@
 
 <?php if (isset($_POST['bayar_ck'])) : ?>
    <script>
-      window.location="http://localhost/rumah_laundry/detail_order/detail_ck/bayar.php?or_ck_number=<?=$no_ck?>"
+      window.location="http://localhost/rumah_laundry_6/detail_order/detail_ck/bayar.php?or_ck_number=<?=$no_ck?>"
    </script>
 <?php endif ?>
 

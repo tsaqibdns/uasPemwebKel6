@@ -9,7 +9,7 @@
       <div class="box">
          <img src="<?=url('_assets/img/berhasil.png')?>" height="68" alt="alert sukses">
             <p>Order Berhasil Di Tambahkan</p>
-            <button onclick="window.location='http://localhost/rumah_laundry/'" class="btn-alert">Ok</button>
+            <button onclick="window.location='http://localhost/rumah_laundry_6/'" class="btn-alert">Ok</button>
          </div>
       </div>
    <?php else : ?>
@@ -17,7 +17,7 @@
          <div class="box">
             <img src="<?=url('_assets/img/gagal.png')?>" height="68" alt="alert gagal">
             <p>Order Gagal Di Tambahkan</p>
-            <button onclick="window.location='http://localhost/rumah_laundry/'" class="btn-alert">Ok</button>
+            <button onclick="window.location='http://localhost/rumah_laundry_6/'" class="btn-alert">Ok</button>
          </div>
       </div>
    <?php endif ?>

@@ -25,67 +25,13 @@ function query($query){
 // Fungsi Absolute URL
 // Absolute url merupakan Serangkaian alamat yang menunjukkan suatu dokumen atau direktori, dengan menyertakan alamat domain atau host
 function url($url = null){
-	$url_utama = "http://localhost/rumah_laundry_8";
+	$url_utama = "http://localhost/rumah_laundry_6";
 	if ($url != null) {
 		return $url_utama . '/' . $url;
 	}else{
 		return $url_utama;
 	}
 }
-
-// CRUD (Management Karyawan)
-function add_kary($karyawan){
-	global $koneksi;
-
-	$nama		= htmlspecialchars($karyawan['nama']);
-	$username	= htmlspecialchars($karyawan['username']);
-	$email		= htmlspecialchars($karyawan['email']);
-	$password	= stripcslashes(htmlspecialchars($karyawan['password']));
-	$level		= $karyawan['level'];
-
-	// Cek apakah username dan email sudah tersedia
-	$master = mysqli_query($koneksi,"SELECT * FROM master WHERE username='$username' OR email='$email'");
-	if (mysqli_num_rows($master) > 0) {
-		echo "
-			<script>
-				alert('Username atau Email Sudah Terdaftar')
-			</script>
-		";
-		return false;
-	}
-
-	$password = password_hash($password, PASSWORD_DEFAULT);
-	$insert = "INSERT INTO master VALUES ('','$nama','$email','$username','$password','$level')";
-	mysqli_query($koneksi,$insert);
-
-	return mysqli_affected_rows($koneksi);
-}
-
-function update_kary($up_kary){
-	global $koneksi;
-
-	$id_user 	= $up_kary['id_user'];
-	$nama 		= htmlspecialchars($up_kary['nama']);
-	$username 	= htmlspecialchars($up_kary['username']);
-	$email 		= htmlspecialchars($up_kary['email']);
-
-	$up_query = "UPDATE master SET 
-		nama 		= '$nama', 
-		username = '$username', 
-		email 	= '$email' 
-		WHERE id_user = '$id_user'
-	";
-
-	mysqli_query($koneksi,$up_query);
-	return mysqli_affected_rows($koneksi);
-}
-
-function del_kary($id_kary){
-	global $koneksi;
-	mysqli_query($koneksi,"DELETE FROM master WHERE id_user = '$id_kary'");
-	return mysqli_affected_rows($koneksi);
-}
-
 
 
 // CRUD Paket Cuci Komplit
@@ -216,40 +162,66 @@ function del_cs($del_cs){
 function order_ck($order_ck){
 	global $koneksi;
 
-	$nama_pel = htmlspecialchars($order_ck['nama_pel_ck']);
-	$no_telp = htmlspecialchars($order_ck['no_telp_ck']);
-	$alamat = htmlspecialchars($order_ck['alamat_ck']);
-	$jns_pkt = htmlspecialchars($order_ck['jenis_paket_ck']);
-	$berat_qty = htmlspecialchars($order_ck['berat_qty_ck']);
-	$tgl_masuk = htmlspecialchars($order_ck['tgl_masuk_ck']);
+	// Tangkap input & bersihkan
+	$nama_pel   = htmlspecialchars($order_ck['nama_pel_ck']);
+	$no_telp    = htmlspecialchars($order_ck['no_telp_ck']);
+	$alamat     = htmlspecialchars($order_ck['alamat_ck']);
+	$jns_pkt    = htmlspecialchars($order_ck['jenis_paket_ck']);
+	$berat_qty  = floatval($order_ck['berat_qty_ck']);
+	$tgl_masuk  = htmlspecialchars($order_ck['tgl_masuk_ck']);
 	$tgl_keluar = htmlspecialchars($order_ck['tgl_keluar_ck']);
-	$ket = htmlspecialchars($order_ck['keterangan_ck']);
+	$ket        = htmlspecialchars($order_ck['keterangan_ck']);
 
-	// Ambil data dari tabel daftar paket cuci komplit
-	$pkt_ck = mysqli_query($koneksi,"SELECT * FROM tb_cuci_komplit WHERE nama_paket_ck = '$jns_pkt'");
-
-	if (mysqli_num_rows($pkt_ck) === 1) {
-
-		$result_ck = mysqli_fetch_assoc($pkt_ck);
-
-		$wkt_kerja_ck = $result_ck['waktu_kerja_ck'];
-		$tarif_perkilo = $result_ck['tarif_ck'];
-		$total_bayar = $berat_qty * $result_ck['tarif_ck'];
-
-		/* Generate nomor order */
-		$str = uniqid();
-		$limitNum = substr($str, 0,7);
-		$orderNum = 'CK-' . strtoupper($limitNum);
+	// ✅ Validasi input kosong atau tidak wajar
+	if (
+		empty($nama_pel) || empty($jns_pkt) || 
+		$berat_qty <= 0 || empty($tgl_masuk) || empty($tgl_keluar)
+	) {
+		return false;
 	}
-	
-	$insert_ck = "INSERT INTO tb_order_ck VALUES( 
-		'','$orderNum','$nama_pel','$no_telp','$alamat',
-		'$jns_pkt','$wkt_kerja_ck','$berat_qty','$tarif_perkilo',
-		'$tgl_masuk','$tgl_keluar','$total_bayar',
-		'$ket' )";
-	mysqli_query($koneksi,$insert_ck);
-	return mysqli_affected_rows($koneksi);
+
+	// ✅ Validasi format tanggal
+	if (!strtotime($tgl_masuk) || !strtotime($tgl_keluar)) {
+		return false; // tanggal tidak valid
+	}
+
+	// ✅ Validasi tanggal keluar tidak boleh lebih awal dari masuk
+	if (strtotime($tgl_keluar) < strtotime($tgl_masuk)) {
+		return false;
+	}
+
+	// Ambil data paket
+	$pkt_ck = mysqli_query($koneksi,"SELECT * FROM tb_cuci_komplit WHERE nama_paket_ck = '$jns_pkt'");
+	if (mysqli_num_rows($pkt_ck) !== 1) {
+		return false;
+	}
+
+	$result_ck     = mysqli_fetch_assoc($pkt_ck);
+	$wkt_kerja_ck  = $result_ck['waktu_kerja_ck'];
+	$tarif_perkilo = $result_ck['tarif_ck'];
+	$total_bayar   = $berat_qty * $tarif_perkilo;
+
+	// Generate nomor order unik
+	$orderNum = 'CK-' . strtoupper(substr(uniqid(), 0, 7));
+
+	// Insert ke database
+	$insert_ck = "INSERT INTO tb_order_ck VALUES(
+		'', '$orderNum', '$nama_pel', '$no_telp', '$alamat',
+		'$jns_pkt', '$wkt_kerja_ck', '$berat_qty', '$tarif_perkilo',
+		'$tgl_masuk', '$tgl_keluar', '$total_bayar', '$ket'
+	)";
+	$hasil = mysqli_query($koneksi, $insert_ck);
+
+	// ✅ Jika berhasil, panggil prosedur
+	if ($hasil) {
+		$tanggal = date('Y-m-d', strtotime($tgl_masuk));
+		mysqli_query($koneksi, "CALL HitungPendapatanHarian('$tanggal')");
+		return true;
+	} else {
+		return false;
+	}
 }
+
 
 // Batal/Hapus Daftar Orderan Cuci Komplit
 function del_or_ck($or_numb_ck){
@@ -262,39 +234,57 @@ function del_or_ck($or_numb_ck){
 function order_dc($order_dc){
 	global $koneksi;
 
-	$nama_pel_dc = htmlspecialchars($order_dc['nama_pel_dc']);
-	$no_telp = htmlspecialchars($order_dc['no_telp_dc']);
-	$alamat_dc = htmlspecialchars($order_dc['alamat_dc']);
-	$jns_paket = htmlspecialchars($order_dc['jenis_paket_dc']);
-	$berat_dc = htmlspecialchars($order_dc['berat_qty_dc']);
-	$tgl_msk_dc = htmlspecialchars($order_dc['tgl_masuk_dc']);
-	$tgl_kel_dc = htmlspecialchars($order_dc['tgl_keluar_dc']);
-	$ket_dc = htmlspecialchars($order_dc['keterangan_dc']);
+	$nama_pel   = htmlspecialchars($order_dc['nama_pel_dc']);
+	$no_telp    = htmlspecialchars($order_dc['no_telp_dc']);
+	$alamat     = htmlspecialchars($order_dc['alamat_dc']);
+	$jns_pkt    = htmlspecialchars($order_dc['jenis_paket_dc']);
+	$berat_qty  = floatval($order_dc['berat_qty_dc']);
+	$tgl_masuk  = htmlspecialchars($order_dc['tgl_masuk_dc']);
+	$tgl_keluar = htmlspecialchars($order_dc['tgl_keluar_dc']);
+	$ket        = htmlspecialchars($order_dc['keterangan_dc']);
 
-	$pkt_dc = mysqli_query($koneksi, "SELECT * FROM tb_dry_clean WHERE nama_paket_dc = '$jns_paket'");
-
-	if (mysqli_num_rows($pkt_dc) === 1) {
-		$result_dc = mysqli_fetch_assoc($pkt_dc);
-
-		$wkt_kerja_dc = $result_dc['waktu_kerja_dc'];
-		$trf_dc = $result_dc['tarif_dc'];
-		$tot_bayar_dc = $result_dc['tarif_dc'] * $berat_dc;
-
-		// Generate Nomor Order
-		$no_dc = uniqid();
-		$limitNum = substr($no_dc, 0,7);
-		$orderNum_dc = 'DC-' . strtoupper($limitNum);
+	if (
+		empty($nama_pel) || empty($jns_pkt) || 
+		$berat_qty <= 0 || empty($tgl_masuk) || empty($tgl_keluar)
+	) {
+		return false;
 	}
 
-	$query_dc = "INSERT INTO tb_order_dc VALUES (
-		'','$orderNum_dc','$nama_pel_dc','$no_telp','$alamat_dc','$jns_paket','$wkt_kerja_dc',
-		'$berat_dc','$trf_dc','$tgl_msk_dc','$tgl_kel_dc','$tot_bayar_dc','$ket_dc'
+	if (!strtotime($tgl_masuk) || !strtotime($tgl_keluar)) {
+		return false;
+	}
+
+	if (strtotime($tgl_keluar) < strtotime($tgl_masuk)) {
+		return false;
+	}
+
+	$pkt_dc = mysqli_query($koneksi, "SELECT * FROM tb_dry_clean WHERE nama_paket_dc = '$jns_pkt'");
+	if (mysqli_num_rows($pkt_dc) !== 1) {
+		return false;
+	}
+
+	$result_dc     = mysqli_fetch_assoc($pkt_dc);
+	$wkt_kerja_dc  = $result_dc['waktu_kerja_dc'];
+	$tarif_perkilo = $result_dc['tarif_dc'];
+	$total_bayar   = $berat_qty * $tarif_perkilo;
+	$orderNum      = 'DC-' . strtoupper(substr(uniqid(), 0, 7));
+
+	$insert_dc = "INSERT INTO tb_order_dc VALUES(
+		'', '$orderNum', '$nama_pel', '$no_telp', '$alamat',
+		'$jns_pkt', '$wkt_kerja_dc', '$berat_qty', '$tarif_perkilo',
+		'$tgl_masuk', '$tgl_keluar', '$total_bayar', '$ket'
 	)";
+	$hasil = mysqli_query($koneksi, $insert_dc);
 
-	mysqli_query($koneksi,$query_dc);
-	return mysqli_affected_rows($koneksi);
-
+	if ($hasil) {
+		$tanggal = date('Y-m-d', strtotime($tgl_masuk));
+		mysqli_query($koneksi, "CALL HitungPendapatanHarian('$tanggal')");
+		return true;
+	} else {
+		return false;
+	}
 }
+
 
 // Batal/Hapus Daftar Orderan Cuci Kering
 function del_or_dc($or_numb_dc){
@@ -307,35 +297,55 @@ function del_or_dc($or_numb_dc){
 function order_cs($order_cs){
 	global $koneksi;
 
-	$nama_pel_cs = htmlspecialchars($order_cs['nama_pel_cs']);
-	$no_telp_cs = htmlspecialchars($order_cs['no_telp_cs']);
-	$alamat_cs = htmlspecialchars($order_cs['alamat_cs']);
-	$jenis_pkt_cs = htmlspecialchars($order_cs['jenis_paket_cs']);
-	$jml_pcs = htmlspecialchars($order_cs['jml_pcs']);
-	$tgl_msk_cs = htmlspecialchars($order_cs['tgl_masuk_cs']);
-	$tgl_kel_cs = htmlspecialchars($order_cs['tgl_keluar_cs']);
-	$ket_cs = htmlspecialchars($order_cs['keterangan_cs']);
+	$nama_pel   = htmlspecialchars($order_cs['nama_pel_cs']);
+	$no_telp    = htmlspecialchars($order_cs['no_telp_cs']);
+	$alamat     = htmlspecialchars($order_cs['alamat_cs']);
+	$jns_pkt    = htmlspecialchars($order_cs['jenis_paket_cs']);
+	$jumlah     = intval($order_cs['jumlah_qty_cs']);
+	$tgl_masuk  = htmlspecialchars($order_cs['tgl_masuk_cs']);
+	$tgl_keluar = htmlspecialchars($order_cs['tgl_keluar_cs']);
+	$ket        = htmlspecialchars($order_cs['keterangan_cs']);
 
-	$pkt_cs = mysqli_query($koneksi,"SELECT * FROM tb_cuci_satuan WHERE nama_cs = '$jenis_pkt_cs'");
-	if (mysqli_num_rows($pkt_cs) === 1) {
-		$result_cs = mysqli_fetch_assoc($pkt_cs);
-
-		$wkt_krj_cs = $result_cs['waktu_kerja_cs'];
-		$trf_cs = $result_cs['tarif_cs'];
-		$totBayar_cs = $result_cs['tarif_cs'] * $jml_pcs;
-
-		// Generate Nomor Order
-		$noCs = uniqid();
-		$limitNo_cs = substr($noCs, 0,7);
-		$orderNum_cs = 'CS-' . strtoupper($limitNo_cs);
+	if (
+		empty($nama_pel) || empty($jns_pkt) || 
+		$jumlah <= 0 || empty($tgl_masuk) || empty($tgl_keluar)
+	) {
+		return false;
 	}
 
-	$query_cs = "INSERT INTO tb_order_cs VALUES (
-		'','$orderNum_cs','$nama_pel_cs','$no_telp_cs','$alamat_cs','$jenis_pkt_cs',
-		'$wkt_krj_cs','$jml_pcs','$trf_cs','$tgl_msk_cs','$tgl_kel_cs','$totBayar_cs','$ket_cs'
+	if (!strtotime($tgl_masuk) || !strtotime($tgl_keluar)) {
+		return false;
+	}
+
+	if (strtotime($tgl_keluar) < strtotime($tgl_masuk)) {
+		return false;
+	}
+
+	$pkt_cs = mysqli_query($koneksi, "SELECT * FROM tb_cuci_satuan WHERE nama_paket_cs = '$jns_pkt'");
+	if (mysqli_num_rows($pkt_cs) !== 1) {
+		return false;
+	}
+
+	$result_cs    = mysqli_fetch_assoc($pkt_cs);
+	$wkt_kerja_cs = $result_cs['waktu_kerja_cs'];
+	$tarif_satuan = $result_cs['tarif_cs'];
+	$total_bayar  = $jumlah * $tarif_satuan;
+	$orderNum     = 'CS-' . strtoupper(substr(uniqid(), 0, 7));
+
+	$insert_cs = "INSERT INTO tb_order_cs VALUES(
+		'', '$orderNum', '$nama_pel', '$no_telp', '$alamat',
+		'$jns_pkt', '$wkt_kerja_cs', '$jumlah', '$tarif_satuan',
+		'$tgl_masuk', '$tgl_keluar', '$total_bayar', '$ket'
 	)";
-	mysqli_query($koneksi,$query_cs);
-	return mysqli_affected_rows($koneksi);
+	$hasil = mysqli_query($koneksi, $insert_cs);
+
+	if ($hasil) {
+		$tanggal = date('Y-m-d', strtotime($tgl_masuk));
+		mysqli_query($koneksi, "CALL HitungPendapatanHarian('$tanggal')");
+		return true;
+	} else {
+		return false;
+	}
 }
 
 // Batal/Hapus Daftar Orderan Cuci Satuan
