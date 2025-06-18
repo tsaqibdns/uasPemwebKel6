@@ -2,8 +2,7 @@
    require_once('../../_header.php'); 
    $id_cs = $_GET['id_cs'];
    $data_cs = query("SELECT * FROM tb_cuci_satuan WHERE id_cs = '$id_cs'")[0];
-   var_dump($data_cs);   
-?>
+?>   
    
    <?php if (isset($_POST['ubah'])) : ?>
       <?php if (edit_cs($_POST) > 0) : ?>

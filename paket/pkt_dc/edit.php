@@ -2,7 +2,6 @@
    require_once('../../_header.php');
    $id_dc = $_GET['id_dc'];
    $data_dc = query("SELECT * FROM tb_dry_clean WHERE id_dc = '$id_dc'")[0];
-   // var_dump($data_dc);
 ?>
 
 <?php if (isset($_POST['ubah'])) : ?>
