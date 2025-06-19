@@ -30,7 +30,7 @@
                <div class="card">
                   <div class="card-title card-flex">
                      <div class="card-col">
-                        <h2>Dry Clean</h2>
+                        <h2>Cuci Satuan</h2>
                      </div>
 
                      <div class="card-col txt-right">

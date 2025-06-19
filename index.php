@@ -4,7 +4,6 @@
 		header("Location: login.php");
 		exit();
 	}
-	$jml_karyawan = count(query('SELECT * FROM master LIMIT 20 OFFSET 1'));
 ?>
 
 	<div id="main" class="main-content">
