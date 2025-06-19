@@ -104,7 +104,7 @@
 					<div class="bubble-5"></div>
 					<div class="bubble-6"></div>
 
-					<!-- Garis Variasi -->
+					<!-- Garis Variasi --> 
 					<div class="garis garis-sm garis-1"></div>
 					<div class="garis garis-md garis-2"></div>
 					<div class="garis garis-sm garis-3"></div>

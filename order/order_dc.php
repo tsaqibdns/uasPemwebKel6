@@ -17,7 +17,7 @@
          <div class="box">
             <img src="<?=url('_assets/img/gagal.png')?>" height="68" alt="alert gagal">
             <p>Gagal Di Tambahkan</p>
-            <button onclick="window.location='http://localhost/rumah_laundry_6/'" class="btn-alert">Ok</button>
+            <button onclick="window.location='http://localhost/rumah_laundry_6/order/order_dc.php'" class="btn-alert">Ok</button>
          </div>
       </div>
    <?php endif ?>
